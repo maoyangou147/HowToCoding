@@ -1,3 +1,4 @@
+'''
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -91,5 +92,50 @@ class EncoderLayer(nn.Module):
         x_mlp = self.mlp_norm(x_mlp)
 
         return x_mlp
+'''
+
+
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+import numpy as np
+
+def attention(query, key, value, mask=None):
+    sqrt_dim_head = np.sqrt(query.shape[-1])
+
+    scores = torch.matmul(query, key.transpose(-1, -2)) / sqrt_dim_head
+
+    if mask is not None:
+        scores = scores.masked_fill(mask==0, 1e-9)
+    
+    weights = F.softmax(weights, dim=-1)
+    return torch.matmul(weights, value)
+
+class MultiHeadAttention(nn.Module):
+    def __init__(self, dim_model, num_head, droprate):
+        self.dim_model = dim_model
+        self.num_head = num_head
+        self.dim_head = dim_model // num_head
+
+        self.W_Q = nn.Linear(self.dim_model, self.dim_model)
+        self.W_K = nn.Linear(self.dim_model, self.dim_model)
+        self.W_V = nn.Linear(self.dim_model, self.dim_model)
+        self.fc = nn.Linear(self.dim_model, self.dim_model)
+
+        self.dropout = nn.Dropout(droprate)
+
+    def forward(self, query, key, value, mask=None):
+        # query: (B, N, C)
+        B, N = query.shape[0], query.shape[1]
+
+        Q = self.W_Q(query).view(B, N, self.num_head, self.dim_head).transpose(1, 2)
+        K = self.W_K(key).view(B, N, self.num_head, self.dim_head).transpose(1, 2)
+        V = self.W_V(value).view(B, N, self.num_head, self.dim_head).transpose(1, 2)
+
+        attn = attention(Q, K, V, mask)
+        output = self.dropout(self.fc(attn))
+
+        return output
+
 
 
