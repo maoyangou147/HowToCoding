@@ -40,7 +40,7 @@ class Labelme2YOLO(object):
     def __init__(self, json_dir):
         self._json_dir = json_dir
  
-        self._label_id_map = label_idx_map_ent
+        self._label_id_map = label_idx_map
  
     def _make_train_val_dir(self):
         self._label_dir_path = os.path.join(self._json_dir,
@@ -264,9 +264,9 @@ class Labelme2YOLO(object):
  
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--json_dir', type=str, default='/home/bob/dataset/dwz_label_new/ent_image_data1/',
+    parser.add_argument('--json_dir', type=str, default='/home/bob/dataset/dwz_label_new/all_image_dataset/',
                         help='Please input the path of the labelme json files.')
-    parser.add_argument('--val_size', type=float, nargs='?', default=0.05,
+    parser.add_argument('--val_size', type=float, nargs='?', default=0.1,
                         help='Please input the validation dataset size, for example 0.1 ')
     parser.add_argument('--json_name', type=str, nargs='?', default=None,
                         help='If you put json name, it would convert only one json file to YOLO.')
